@@ -1,0 +1,93 @@
+[run]
+runid = "mcom_test"
+system_seed = 42
+dynamics_seed = 100
+t_end = 0.073
+dt = 0.00146
+dt_out = 0.01
+verb = 1
+
+[variant]
+use_PI_curve = true
+use_exudation = true
+competing_pairs = false
+
+[dims]
+P = 2
+H = 2
+DOC = 2
+DON = 2
+M = 2
+
+[network]
+explicit = true
+exPDOC = [[1], [2]]
+exPDON = [[1], [2]]
+exHDOC = [[1], [2]]
+exHDON = [[1], [1, 2]]
+upDOCH = [[1], [2]]
+upDONH = [[1], [2]]
+prodHM = [[1], [2]]
+effsMP = [[1, 2], [2]]
+
+[init]
+explicit = ["DOC_init", "H_init", "P_init"]
+t_init = 0.0
+N_init = 1.0
+P_init = [0.14285714285714285, 0.07692307692307693]
+DOC_init = [0.0, 1.0]
+H_init = [0.06666666666666667, 0.04]
+
+M_init = 0.000000001
+DON_init = 0.1
+
+[environment]
+explicit = ["d_M"]
+irradiance = "constant(2)"
+D = 0.05
+d_M = [0.001, 0.001]
+
+SourceNrnd  = 0.0
+nutrient = "constant(1)"
+
+[dynamics]
+explicit = ["V_NP", "V_DONH", "R_HDON", "A_MP"]
+h_M = 0.00000001
+
+V_NP = [1.0, 1.5]
+XP_C = [7.0, 13.0]
+K_NP = [1.0, 5.0]
+d_P = [0.1, 0.2]
+d_P2 = 0.0
+lambda = -0.1
+rCN_P = [4.5, 5.5]
+rChlC = 1.0
+q_ex = [0.1, 0.5]
+rCN_ex = [3.0, 4.0]
+I_max = [4.5, 5.5]
+I_alpha = [0.07, 0.08]
+I_beta = [0.002, 0.004]
+
+V_NH = [1.0, 3.0]
+XH_C = [1.5, 2.5]
+K_NH = [8.0, 15.0]
+d_H = [0.05, 0.15]
+d_H2 = 0.0
+rCN_H = [3.5, 4.5]
+
+Y_DOC = [0.2, 0.8]
+Y_DON = [0.2, 0.8]
+K_DOCH = [0.5, 1.5]
+K_DONH = [0.5, 1.5]
+V_DOCH = [3.0, 5.0]
+V_DONH = [[2.5], [3.0]]
+
+R_HDOC = 0.0
+R_HDON = [[1.0], [0.1, 0.9]]
+
+R_PDOC = 0.0
+R_PDON = 0.0
+
+P_HM = [0.0, 0.0000001]
+
+A_MP = [[0.2, 0.1], [1.0]]

@@ -1,0 +1,159 @@
+schema_version: 4
+name: mcom-coculture
+title: "MCoM co-culture: a phytoplankton bloom feeds a heterotroph"
+created: '2026-08-18'
+status: complete
+phase: Evaluate
+
+question: |
+  In a closed (batch) box seeded with a single phytoplankton and a single
+  heterotroph population, does the MCoM reproduction produce the canonical
+  phototroph-heterotroph succession -- a phytoplankton bloom that draws down
+  inorganic nitrogen and, through its exuded dissolved organic carbon and
+  nitrogen, fuels the growth of a heterotroph that would otherwise have almost
+  no substrate?
+hypothesis: |
+  Starting from a tiny heterotroph inoculum (H_init = 0.003, ~1/1000 of the
+  phytoplankton's carbon) with no external organic supply, the heterotroph can
+  only grow on carbon and nitrogen the phytoplankton releases. So the
+  heterotroph population should stay near zero until the phytoplankton bloom
+  produces DOC/DON, then rise steeply, lagging the bloom; and the inorganic
+  nitrogen, with no external resupply (D = 0), should be drawn down from its
+  initial 8.8 mM as the bloom fixes it into biomass.
+objective: |
+  Run the `mcom_coculture` composite (the shipped MCoM `configs/test.toml`
+  parameter set: 1 phytoplankton, 1 heterotroph, a labile + a recalcitrant
+  DOC/DON pool, constant light, closed box) for 200 days and verify (a) the
+  heterotroph establishes a substantial population it could only reach by
+  consuming phytoplankton exudate, and (b) inorganic nitrogen is drawn down.
+description: |
+  Wraps the `viva_mcom.composites.coculture.mcom_coculture` generator -- a
+  single `MComReproductionProcess` carrying the whole community. The parameter
+  set is MCoM's shipped `configs/test.toml`: a Platt P-I phytoplankton
+  (use_PI_curve, no light-limited exudation) releasing all its labile carbon to
+  DOC0 and nitrogen to DON0, and a heterotroph that takes up only the labile
+  DOC0/DON0 (upDOCH=[[1]], upDONH=[[1]]) while its mortality routes a small
+  fraction (1%) of carbon to a recalcitrant DOC1 pool that nothing consumes.
+  The community is a clean-room NumPy reproduction of MCoM's Julia engine
+  (bit-for-bit against upstream golden data -- see `tests/test_golden.py`), so
+  the succession below is MCoM's own dynamics, not an approximation.
+
+  Achieved (200-day run): the phytoplankton blooms from 0.01 to a peak of ~0.84
+  (1e6 cells/mL) around day 44, then busts as nitrogen runs out; the heterotroph
+  rises from 0.003 to a peak ~2.39 around day 50 -- lagging the bloom by ~6 days,
+  the exudate-consumption signature -- and settles near 0.58; inorganic nitrogen
+  falls from 8.8 mM to below 0.5 mM, with a second-half mean ~1.87 mM. The
+  labile DOC0 stays low (consumed) while the recalcitrant DOC1 accumulates.
+
+baseline:
+- name: baseline
+  composite: viva_mcom.composites.coculture.mcom_coculture
+  params: {}
+variants: []
+
+expected_behavior:
+- name: heterotroph-blooms-on-exudate
+  en: "The heterotroph, seeded at 0.003 with no external substrate, grows to a substantial population (mean total density over the run > 0.1) it could only reach by consuming phytoplankton-derived DOC/DON."
+  observable: H_total
+  condition: mean(H_total over full run) > 0.1
+  rationale: >-
+    The heterotroph starts at 0.003 (1e6 cells/mL) and has no external organic
+    carbon or nitrogen source (closed box, DOC/DON come only from the
+    phytoplankton). A run-mean total density above 0.1 -- more than 30x the
+    inoculum -- can only arise from growth on exuded DOC/DON, i.e. genuine
+    phototroph->heterotroph coupling. The achieved mean is 0.74; 0.1 sits well
+    above the ~0.003 no-growth floor and well below the achieved value.
+  measure:
+    kind: derived_scalar
+    field: H_total
+  expect:
+    op: ">"
+    value: 0.1
+- name: inorganic-nitrogen-drawn-down
+  en: "Inorganic nitrogen is drawn down by the bloom: its mean over the second half of the run falls below 4.0 mM, from an initial 8.8 mM."
+  observable: DIN
+  condition: mean(DIN over second half) < 4.0
+  rationale: >-
+    With no external nitrogen resupply (D = 0), the only sink for inorganic
+    nitrogen is uptake into phytoplankton biomass. A second-half mean below 4.0
+    mM (from 8.8 mM initial) evidences substantial biological drawdown. The
+    achieved second-half mean is 1.87 mM; 4.0 leaves headroom while still failing
+    a community that never took up nitrogen (which would stay near 8.8).
+  measure:
+    kind: derived_scalar
+    field: DIN
+  expect:
+    op: "<"
+    value: 4.0
+
+behavior_tests:
+- name: heterotroph-blooms-on-exudate
+  classification: primary
+  description: |
+    Mean total heterotroph density over the full run exceeds 0.1 (1e6 cells/mL)
+    -- >30x the 0.003 inoculum, reachable only by consuming phytoplankton exudate.
+  measure:
+    kind: derived_scalar
+    field: H_total
+    window: full
+  pass_if:
+    op: ">"
+    value: 0.1
+    provenance:
+      kind: calibration
+      note: >-
+        Heterotroph inoculum is 0.003 with no external substrate; achieved run
+        mean is 0.74. 0.1 sits >30x above the no-growth floor and ~7x below the
+        achieved value -- cleanly separating "grew on exudate" from "did not grow".
+- name: inorganic-nitrogen-drawn-down
+  classification: secondary
+  description: |
+    Mean inorganic nitrogen over the second half of the run is below 4.0 mM,
+    down from the initial 8.8 mM -- biological drawdown by the bloom.
+  measure:
+    kind: derived_scalar
+    field: DIN
+    window: second_half
+  pass_if:
+    op: "<"
+    value: 4.0
+    provenance:
+      kind: calibration
+      note: >-
+        Closed box (D=0), so uptake into biomass is the only N sink; achieved
+        second-half mean is 1.87 mM from 8.8 mM initial. 4.0 fails a non-consuming
+        community (stays ~8.8) with headroom over the achieved value.
+
+pipeline_gate:
+  prerequisites: []
+  enables:
+  - mcom-seasonal
+
+canonical_runs:
+- name: default
+  script: studies/mcom-coculture/sims/run.py
+  args: []
+  label: mcom-coculture
+  default: true
+
+visualizations:
+- name: succession
+  chart: viz/succession.html
+  render: "python sims/run.py"
+- name: organic-pools
+  chart: viz/organic_pools.html
+  render: "python sims/run.py"
+embed_visualizations:
+- name: succession
+  url: /workspace/studies/mcom-coculture/viz/succession.html
+  description: "Phytoplankton + heterotroph (log axis) vs inorganic nitrogen -- the bloom-bust succession; the heterotroph peak (2.39 @ day 50) lags the phytoplankton bloom (0.84 @ day 44) by ~7 days, the exudate-consumption signature."
+- name: organic-pools
+  url: /workspace/studies/mcom-coculture/viz/organic_pools.html
+  description: "Dissolved organic pools: the labile DOC0/DON0 stay low (consumed by the heterotroph) while the recalcitrant DOC1 accumulates from heterotroph mortality."
+conclusion: |
+  Both behaviour tests pass. The phytoplankton blooms (0.01 -> 0.84 @ day 44)
+  and busts; the heterotroph rises on the exuded DOC/DON to a peak of 2.39 @ day
+  50 -- a ~7-day lag behind the bloom, for a run-mean density of 0.74 (>200x its
+  0.003 inoculum), which it could only reach by consuming phytoplankton exudate.
+  Inorganic nitrogen is drawn down from 8.8 mM to a second-half mean of 1.87 mM.
+  The canonical phototroph-heterotroph batch succession is reproduced.

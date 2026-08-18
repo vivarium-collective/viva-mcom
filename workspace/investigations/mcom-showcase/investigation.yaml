@@ -1,0 +1,75 @@
+schema_version: 2
+name: mcom-showcase
+title: "MCoM showcase: faithful phototroph-heterotroph community dynamics in process-bigraph"
+created: '2026-08-18'
+status: complete
+question: |
+  Does the viva-mcom process-bigraph wrapper -- a clean-room NumPy reproduction
+  of the MCoM 1.0 Julia engine -- faithfully reproduce MCoM's phototroph-
+  heterotroph community dynamics, both in a closed batch co-culture and in an
+  open, seasonally-forced chemostat, while exposing the community as a composable
+  bigraph process?
+hypothesis: |
+  Because the reproduction is validated bit-for-bit against real MCoM Julia
+  output on deterministic configs, the wrapped composites should reproduce the
+  canonical microbial-community behaviours MCoM was built to capture: a
+  phytoplankton bloom that draws down nutrient and fuels a heterotroph through
+  its exudate (batch), and a sustained, seasonally-oscillating community under
+  continuous dilution and annual light forcing (chemostat).
+description: |
+  Two studies exercise the same wrapped MCoM community (a single phytoplankton
+  and a single heterotroph coupled through DOC/DON pools and inorganic nitrogen)
+  under two contrasting environmental regimes, driven entirely by the clean-room
+  reproduction in viva_mcom.engine.
+studies:
+- mcom-coculture
+- mcom-seasonal
+executive:
+  what_is_this: |
+    viva-mcom wraps MCoM 1.0 (Lucken et al., GMD 2026) -- a scalable box model of
+    phototroph-heterotroph microbial communities whose numerical core is Julia --
+    as a process-bigraph process, via a clean-room NumPy reproduction that runs
+    with no Julia toolchain. This investigation demonstrates the wrapper on two
+    regimes: a closed batch co-culture and an open seasonally-lit chemostat.
+  verdict: |
+    The reproduction is faithful (bit-for-bit against real MCoM Julia output) and
+    both composites reproduce the expected community dynamics: all four behaviour
+    tests across the two studies pass.
+  verdict_status: supported
+  verdict_detail: |
+    Fidelity: viva_mcom reproduces the upstream Julia engine to < 1e-9 (in fact
+    exactly) on the two shipped golden trajectories (tests/test_golden.py).
+    Batch co-culture: the phytoplankton blooms (0.01 -> 0.84 @ day 44) and busts;
+    the heterotroph rises on the exudate to a peak 2.39 @ day 50 -- a ~7-day lag
+    behind the bloom, the exudate-consumption signature -- for a run-mean density
+    of 0.74 (>200x its inoculum); inorganic nitrogen is drawn down from 8.8 mM to
+    a second-half mean of 1.87 mM. Seasonal chemostat: the community is sustained
+    under 0.1/day dilution, with phytoplankton oscillating 0.42-0.89 (2.1x
+    peak/trough) on the annual light cycle and holding DIN near 2.1 mM against a
+    10 mM inflow. Both studies pass all declared behaviour tests.
+  decisions_needed: []
+scientific_argument:
+  main_claim: |
+    viva-mcom faithfully reproduces MCoM 1.0's phototroph-heterotroph community
+    dynamics as a composable process-bigraph process, across both closed-batch
+    and open-chemostat regimes.
+  evidence_for:
+  - "Bit-for-bit reproduction of the upstream MCoM Julia engine on two golden trajectories (tests/test_golden.py, agreement exactly 0)."
+  - "Batch co-culture reproduces the canonical bloom-bust succession with a heterotroph that grows only on phytoplankton exudate and lags the bloom by ~7 days (study mcom-coculture, both tests pass)."
+  - "Seasonally-forced chemostat produces a sustained, annually-oscillating community (2.1x peak/trough) that neither washes out nor runs away (study mcom-seasonal, both tests pass)."
+  evidence_against: []
+  key_figures:
+  - "workspace/studies/mcom-coculture/viz/succession.html"
+  - "workspace/studies/mcom-seasonal/viz/seasonal_succession.html"
+  caveats:
+  - "This is a clean-room reproduction, not the upstream Julia engine; RNG-dependent random parameter/network draws are not reproduced (deterministic configs are exact). See REPRODUCTION.md."
+  - "Both studies use the shipped 1-phytoplankton / 1-heterotroph parameter set; MCoM's scalability to large communities is supported by the framework but not exercised here."
+acceptance_criteria:
+- study: mcom-coculture
+  behavior: heterotroph-blooms-on-exudate
+- study: mcom-coculture
+  behavior: inorganic-nitrogen-drawn-down
+- study: mcom-seasonal
+  behavior: community-sustained-under-dilution
+- study: mcom-seasonal
+  behavior: nutrient-drawn-down-in-chemostat

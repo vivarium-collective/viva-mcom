@@ -1,0 +1,81 @@
+[run]
+runid = "mcom_test"
+verb = 1
+system_seed = 42
+dynamics_seed = 100
+t_end = 370
+dt = 0.001
+dt_out = 0.05
+save_offset = 367
+
+[variant]
+use_PI_curve = false
+use_exudation = true
+competing_pairs = true
+
+[dims]
+P = 1
+H = 1
+DOC = 1
+DON = 1
+M = 1
+
+[init]
+t_init = 362.0
+N_init = 0.0
+P_init = 0.1
+DOC_init = 0.0
+H_init = 0.0
+
+M_init = 0.0
+DON_init = 0.0
+
+[environment]
+irradiance = "constant(50)"
+D = 0.5
+d_M = 0.3
+
+SourceNrnd  = 0.0
+nutrient = "0 + pulse(0,1,5,365)"
+
+[dynamics]
+h_M = 0.00000001
+
+V_NP = [1.1, 1.1]
+XP_C = 7.1
+K_NP = [2.4, 2.4]
+d_P = 0.2
+d_P2 = 0.0
+lambda = 0.0
+rCN_P = 5.0
+rChlC = 0.04
+q_ex = 0.2
+rCN_ex = 3.5
+I_max = 125.0
+I_alpha = 0.0793
+I_beta = 0.003
+
+V_NH = [2.0, 2.0]
+XH_C = 2.0
+K_NH = [10, 10]
+d_H = 0.1
+d_H2 = 0.0
+rCN_H = 4.0
+
+Y_DOC = [0.6, 0.6]
+Y_DON = [0.6, 0.6]
+K_DOCH = [1.0, 1.0]
+K_DONH = [1.0, 1.0]
+V_DOCH = 4.0
+V_DONH = 4.0
+
+R_HDOC = [1.0, 1.0]
+R_HDON = [1.0, 1.0]
+
+R_PDOC = [1.0, 1.0]
+R_PDON = [1.0, 1.0]
+
+P_HM = [0.0000001, 0.0000001]
+
+A_MP = 0.0
+
