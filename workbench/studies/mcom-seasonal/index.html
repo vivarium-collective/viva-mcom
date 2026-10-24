@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Study: mcom-seasonal</title>
-<link rel="stylesheet" href="/viva-mcom/dashboard/assets/style.css">
-<link rel="stylesheet" href="/viva-mcom/dashboard/assets/progress-track.css">
-<link rel="stylesheet" href="/viva-mcom/dashboard/assets/responsive.css">
+<link rel="stylesheet" href="/viva-mcom/workbench/assets/style.css">
+<link rel="stylesheet" href="/viva-mcom/workbench/assets/progress-track.css">
+<link rel="stylesheet" href="/viva-mcom/workbench/assets/responsive.css">
 <!-- Inherit the workbench light/dark theme (this page loads in an iframe;
      same-origin, so it shares the parent's localStorage 'viv.theme'; the
      'storage' event, which the browser fires here when the parent toggles,
@@ -637,7 +637,7 @@ time-series visualization.
     
     
     <div class="figure-card embed-viz-card">
-      <iframe src="/viva-mcom/dashboard/workspace/studies/mcom-seasonal/viz/seasonal_succession.html"
+      <iframe src="/viva-mcom/workbench/workspace/studies/mcom-seasonal/viz/seasonal_succession.html"
               class="figure-media-frame figure-media-frame--embed"
               loading="lazy" title="seasonal-succession"
               onload="window.__fitFigureFrame&&window.__fitFigureFrame(this)"
@@ -649,7 +649,7 @@ time-series visualization.
         <span class="figure-source-chip">embed</span>
         <span class="figure-title">seasonal-succession</span>
         
-        <a href="/viva-mcom/dashboard/workspace/studies/mcom-seasonal/viz/seasonal_succession.html" target="_blank" class="figure-open-link">Open in new tab ↗</a>
+        <a href="/viva-mcom/workbench/workspace/studies/mcom-seasonal/viz/seasonal_succession.html" target="_blank" class="figure-open-link">Open in new tab ↗</a>
       </div>
     </div>
     
@@ -1225,9 +1225,9 @@ stable, oscillating open-system community.</p>
 </section>
 
 </main>
-<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/vivarium-collective/viva-mcom", basePath: "/viva-mcom/dashboard", inputsDownloadBase: "https://github.com/vivarium-collective/viva-mcom/raw/main", provenance: {"repo_slug": "vivarium-collective/viva-mcom", "repo_url": "https://github.com/vivarium-collective/viva-mcom", "commit": "821a4a6aecb95e5e6187c6426ecab0000c9c84e5", "commit_url": "https://github.com/vivarium-collective/viva-mcom/commit/821a4a6aecb95e5e6187c6426ecab0000c9c84e5", "branch": "main", "lockfile": "uv.lock@a8a88b6d40cd", "generated_at": "2026-10-24 19:00 UTC"} };</script>
-<script src="/viva-mcom/dashboard/assets/data-source.js"></script>
-<script src="/viva-mcom/dashboard/assets/toast.js"></script>
+<script>window.__DASH_CONFIG__ = { mode: "snapshot", interactiveUrl: "https://github.com/vivarium-collective/viva-mcom", basePath: "/viva-mcom/workbench", inputsDownloadBase: "https://github.com/vivarium-collective/viva-mcom/raw/main", provenance: {"repo_slug": "vivarium-collective/viva-mcom", "repo_url": "https://github.com/vivarium-collective/viva-mcom", "commit": "c561633fef0ecde82ac80f44fd416797eff6cbd2", "commit_url": "https://github.com/vivarium-collective/viva-mcom/commit/c561633fef0ecde82ac80f44fd416797eff6cbd2", "branch": "main", "lockfile": "uv.lock@a8a88b6d40cd", "generated_at": "2026-10-24 19:03 UTC"} };</script>
+<script src="/viva-mcom/workbench/assets/data-source.js"></script>
+<script src="/viva-mcom/workbench/assets/toast.js"></script>
 <script>
 window._studyName = "mcom-seasonal";
 window._study = null;  // populated by _bootstrapStudy() in study-detail.js
@@ -1340,9 +1340,9 @@ function _seedFollowupProposal(parent, proposalId) {
 window._seedFollowupStudy = _seedFollowupStudy;
 window._seedFollowupProposal = _seedFollowupProposal;
 </script>
-<script src="/viva-mcom/dashboard/assets/configure-run.js"></script>
-<script src="/viva-mcom/dashboard/assets/perfetto-open.js"></script>
-<script src="/viva-mcom/dashboard/assets/sim-table.js"></script>
+<script src="/viva-mcom/workbench/assets/configure-run.js"></script>
+<script src="/viva-mcom/workbench/assets/perfetto-open.js"></script>
+<script src="/viva-mcom/workbench/assets/sim-table.js"></script>
 <!-- composite-card.js: shared composite-card renderer (extracted from
      walkthrough.js, study-spine-reorg Task 6) — the Model tab uses
      _renderCompositeCardFull to show the SAME rich card the Modules/
@@ -1352,12 +1352,12 @@ window._seedFollowupProposal = _seedFollowupProposal;
      which this iframe does NOT load). composite-card.js's _pcardToggleSec needs
      it to MOUNT a composite's loom — without it, opening a composite from a
      Model card stays stuck on "Resolving composite…". -->
-<script src="/viva-mcom/dashboard/assets/loom-embed.js"></script>
-<script src="/viva-mcom/dashboard/assets/composite-card.js"></script>
-<script src="/viva-mcom/dashboard/assets/checklist-select.js"></script>
-<script src="/viva-mcom/dashboard/assets/progress-track.js"></script>
-<script src="/viva-mcom/dashboard/assets/comparison-view.js"></script>
-<script src="/viva-mcom/dashboard/assets/study-detail.js"></script>
+<script src="/viva-mcom/workbench/assets/loom-embed.js"></script>
+<script src="/viva-mcom/workbench/assets/composite-card.js"></script>
+<script src="/viva-mcom/workbench/assets/checklist-select.js"></script>
+<script src="/viva-mcom/workbench/assets/progress-track.js"></script>
+<script src="/viva-mcom/workbench/assets/comparison-view.js"></script>
+<script src="/viva-mcom/workbench/assets/study-detail.js"></script>
 <script>
 // Re-assert the refresh-aware seed handlers AFTER study-detail.js (which
 // defines its own navigate-away _seedFollowupStudy). The embedded
