@@ -8,11 +8,26 @@
 # re-scaffolding, or by copying the current source from
 #   vivarium-collective/viva-template/template/.github/workflows/<template>
 # template: workspace-ci.yml.j2
-# sha256: a1176cb3abe72e32ec48ef76d4b86711c19d315b5992fd3602c30040fe4b3c89
+# sha256: 386f5ab7b152a6d9f952e47b8e96da0fea2aaf902ca360b5be0106407bbf35ea
 # <<< viva-template-provenance <<<
 
 name: workspace-ci
-on: [push, pull_request]
+
+# Trigger scope keeps CI honest without flooding: pushes run CI only on the
+# default branch, while all other-branch validation happens via the PR. That
+# stops every work-in-progress push to a feature branch from firing a run (and
+# emailing a failure) — you get ONE run per PR sync instead of a push + a
+# pull_request run per commit. The concurrency group then cancels a superseded
+# run when you push again, so rapid iteration no longer leaves a trail of
+# completed red runs.
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+concurrency:
+  group: workspace-ci-${{ github.ref }}
+  cancel-in-progress: true
 
 # CI for a workspace scaffolded from viva-template.
 #
@@ -38,11 +53,18 @@ jobs:
         with:
           submodules: false
       # Fail fast if a local absolute path (file:///, /Users/, /home/) was
-      # committed into a tracked file — a recurring CI break when a sibling
-      # editable install leaks into pyproject.toml. Only needs the repo, so it
-      # runs right after checkout, before any venv-dependent step.
+      # committed into a dependency/config file — a recurring CI break when a
+      # sibling editable install leaks into pyproject.toml. Only needs the repo,
+      # so it runs right after checkout, before any venv-dependent step.
+      # Guarded on presence: an older workspace scaffolded before this script
+      # existed must skip it, not fail with "No such file or directory" (127).
       - name: Check for leaked local paths
-        run: bash scripts/check-no-local-paths.sh
+        run: |
+          if [ -f scripts/check-no-local-paths.sh ]; then
+            bash scripts/check-no-local-paths.sh
+          else
+            echo "scripts/check-no-local-paths.sh not present — skipping local-path check."
+          fi
       - name: Init external submodules (best-effort, non-recursive)
         run: |
           # Default `git submodule update` is non-recursive — omit --recursive
@@ -73,6 +95,20 @@ jobs:
           else
             echo "No root pyproject.toml/setup.py found — installing dev tooling only."
             uv pip install pytest
+          fi
+      - name: Check uv.lock is committed and current
+        # A committed uv.lock is what makes a workspace reproducible: every checkout, CI run and remote
+        # run (the workbench forwards the lock's framework pins to the backend) gets the same versions.
+        # Present -> it must match pyproject.toml (`uv lock --check` fails on a stale lock; refresh with
+        # `uv lock` and commit). Absent -> a warning, so a workspace scaffolded before this check keeps a
+        # green CI until it commits one (`uv lock`, then commit uv.lock).
+        run: |
+          if [ ! -f pyproject.toml ]; then
+            echo "No pyproject.toml — no lock to check."
+          elif [ -f uv.lock ]; then
+            uv lock --check
+          else
+            echo "::warning title=No committed uv.lock::This workspace has no committed uv.lock, so its dependency versions are not reproducible. Run 'uv lock' and commit uv.lock."
           fi
       - name: Lint workspace
         run: |
@@ -128,3 +164,23 @@ jobs:
         run: |
           source .venv/bin/activate
           pytest tests/ -v --color=yes
+
+      - name: Publish render check (no study would 404)
+        run: |
+          # The deploy job (publish-dashboard.yml) renders one read-only shell
+          # per study. If any study fails to render, the published site 404s on
+          # opening it. That guard already lives in the deploy — but the deploy
+          # runs AFTER merge, so a study-render break reaches the live site
+          # before anyone sees it. Run the SAME snapshot build here, as a
+          # required PR gate, so the break is caught before merge. Mirror the
+          # deploy's vivarium-workbench@main install so the gate tests exactly
+          # what will deploy.
+          source .venv/bin/activate
+          uv pip install --reinstall-package vivarium-workbench "vivarium-workbench @ git+https://github.com/vivarium-collective/vivarium-workbench.git@main"
+          if vivarium-workbench-publish --help >/dev/null 2>&1; then
+            # A non-zero exit here means "the snapshot would 404 on opening one
+            # or more studies" — fail the PR rather than the live site.
+            vivarium-workbench-publish --workspace . --out "${RUNNER_TEMP:-/tmp}/render-check"
+          else
+            echo "vivarium-workbench-publish unavailable (older pin) — skipping render check."
+          fi
